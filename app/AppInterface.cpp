@@ -4,15 +4,15 @@
 #include "main.h"
 
 class MyShell : public YRSmallShell {
-    protected:
-        virtual const char* shellClass( void) { return "MyShell"; }
-        virtual const char* mainFileName( ) { return "app/AppInterface.cpp"; }
-    public:
-        MyShell() {}
-        virtual ~MyShell() {}
-    };
+protected:
+    virtual const char* shellClass( void) { return "MyShell"; }
+    virtual const char* mainFileName( ) { return "app/AppInterface.cpp"; }
+public:
+    MyShell() {}
+    virtual ~MyShell() {}
+};
 
-    MyShell yrShell;
+MyShell yrShell;
 
 void initializeApp() {
     BufferedSerial::STM32SerialError error = BSerial2.begin(115200);

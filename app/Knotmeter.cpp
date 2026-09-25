@@ -104,7 +104,7 @@ void Knotmeter::generateNmeaSentence(float speedKnots, float speedKmH) {
             m_outQ.put(m_nmeaSentence[i]);
         }
     }
-    if(m_pdbg) {
-        m_pdbg->print(__FILE__, __LINE__, 1, nmeaBuf);
-    }
+    // if(m_pdbg) {
+    //     m_pdbg->print(__FILE__, __LINE__, 1, nmeaBuf);
+    // }
 }

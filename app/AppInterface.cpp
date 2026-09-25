@@ -18,6 +18,8 @@ public:
 //MyShell yrShell;
 DebugLog debugLog;
 
+CircularQ<char, 16>       m_serial1Inq;
+CircularQ<char, 128>      m_serial1Outq;
 CircularQ<char, 16>       m_inq;
 CircularQ<char, 128>      m_outq;
 
@@ -25,6 +27,10 @@ CircularQ<char, 128>      m_outq;
 Knotmeter knotmeter(&debugLog);
 
 void initializeApp() {
+    BSerial1.begin(4800);
+    BSerial1.init(m_serial1Inq, m_serial1Outq);
+
+
     BSerial2.begin(115200);
 
     //BSerial2.init(yrShell.getInq(), yrShell.getOutq());
@@ -44,5 +50,14 @@ void updateApp() {
     for( uint8_t i = 0; i < 32 && debugLog.valueAvailable(); i++) {
       c = debugLog.get();
       m_outq.put(c);
+    }
+
+
+    if(knotmeter.getOutQ()->valueAvailable()) {
+        char c;
+        for( uint8_t i = 0; i < 48 && knotmeter.getOutQ()->valueAvailable(); i++) {
+            c = knotmeter.getOutQ()->get();
+            m_serial1Outq.put(c);
+        }
     }
 }

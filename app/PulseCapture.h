@@ -8,6 +8,7 @@
 #include <utility/IntervalTimer.h>
 #include <utility/Sliceable.h>
 #include <utility/CircularQ.h>
+#include <utility/DebugLog.h>
 
 #define MAX_NUM_CAPTURES 32
 
@@ -22,6 +23,8 @@ private:
 
     CircularQ<uint16_t, MAX_NUM_CAPTURES> m_captureQ;
 
+    DebugLog *m_pdbg;
+
 protected:
     bool m_initialized;
     uint32_t m_numCaptures;
@@ -29,7 +32,7 @@ protected:
     float calculateFrequency();
     void resetCaptures();
 public:
-    PulseCapture();
+    PulseCapture(DebugLog *dbg);
     virtual ~PulseCapture();
     virtual const char* sliceName( void) { return "PulseCapture"; }
     virtual void init();

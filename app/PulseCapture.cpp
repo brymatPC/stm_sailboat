@@ -6,13 +6,14 @@
 
 extern TIM_HandleTypeDef htim2;
 
-PulseCapture::PulseCapture() :
+PulseCapture::PulseCapture(DebugLog *dbg) :
     m_pin(0),
     m_apbFreq(1),
     m_lastCapture(0),
     m_captureIndex(0),
     m_freq(0.0f),
     m_captureQ(),
+    m_pdbg(dbg),
     m_initialized(false),
     m_numCaptures(0)
 {
@@ -55,6 +56,9 @@ void PulseCapture::slice() {
             resetCaptures();
         }
         m_freq = freq;
+        if(m_pdbg) {
+            m_pdbg->print(__FILE__, __LINE__, 1, (uint32_t) (m_freq * 10.0f), "Freq");
+        }
         //ESP_LOGI(TAG, "%d - Est freq %.2f, numCaptures %lu", m_group, freq, numCaptures);
     }
 }

@@ -1,4 +1,5 @@
 #include "AppInterface.h"
+#include "PulseCapture.h"
 #include "YRShell.h"
 
 #include "main.h"
@@ -14,11 +15,15 @@ public:
 
 MyShell yrShell;
 
+PulseCapture pulseCapture;
+
 void initializeApp() {
     BufferedSerial::STM32SerialError error = BSerial2.begin(115200);
     assert_param(error == BufferedSerial::STM32SerialError::none);
 
     BSerial2.init(yrShell.getInq(), yrShell.getOutq());
+
+    pulseCapture.init();
 }
 
 void updateApp() {

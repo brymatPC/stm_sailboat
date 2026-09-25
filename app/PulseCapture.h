@@ -17,7 +17,7 @@ private:
     // mcpwm_cap_timer_handle_t m_handle;
     // mcpwm_cap_channel_handle_t m_chanHandle;
     uint32_t m_apbFreq;
-
+    float m_freq;
 
 protected:
     bool m_initialized;
@@ -25,7 +25,7 @@ protected:
     float calculateFrequency();
     void resetCaptures();
 public:
-    PulseCapture(uint32_t pin);
+    PulseCapture();
     virtual ~PulseCapture();
     virtual const char* sliceName( void) { return "PulseCapture"; }
     virtual void init();

@@ -7,17 +7,18 @@
 extern TIM_HandleTypeDef htim2;
 
 
-uint32_t m_lastCapture;
-uint32_t m_captures[MAX_NUM_CAPTURES];
+uint16_t m_lastCapture;
+uint16_t m_captures[MAX_NUM_CAPTURES];
 uint32_t m_captureIndex;
 uint32_t m_numCaptures;
 
-uint32_t captureValue = 0;
+uint16_t captureValue = 0;
+uint8_t timerRollovers = 0;
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1) {
-        captureValue = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-        m_captures[m_captureIndex] = captureValue - m_lastCapture;
+        captureValue = (uint16_t) HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+        m_captures[m_captureIndex] = (captureValue - m_lastCapture);
         m_lastCapture = captureValue;
         m_captureIndex++;
         if(m_captureIndex >= MAX_NUM_CAPTURES) {
@@ -27,19 +28,30 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
-PulseCapture::PulseCapture(uint32_t pin) :
-    m_pin(pin),
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM2)
+    {
+        // Code to run on timer rollover/overflow
+        timerRollovers++;
+    }
+}
+
+PulseCapture::PulseCapture() :
+    m_pin(0),
     m_apbFreq(1),
+    m_freq(0.0f),
     m_initialized(false)
 {
-    memset(m_captures, 0, MAX_NUM_CAPTURES * sizeof(uint32_t));
+    memset(m_captures, 0, MAX_NUM_CAPTURES * sizeof(uint16_t));
     m_timer.setInterval(5000);
 }
 PulseCapture::~PulseCapture() {}
 void PulseCapture::init() {
 
-    m_apbFreq = HAL_RCC_GetPCLK1Freq();
+    m_apbFreq = HAL_RCC_GetPCLK1Freq() / 32;
 
+    HAL_TIM_Base_Start_IT(&htim2);
     HAL_TIM_IC_Start_IT(&htim2, TIM_CHANNEL_1);
 
     m_initialized = true;
@@ -55,6 +67,7 @@ void PulseCapture::slice() {
         } else {
             resetCaptures();
         }
+        m_freq = freq;
         //ESP_LOGI(TAG, "%d - Est freq %.2f, numCaptures %lu", m_group, freq, numCaptures);
     }
 }

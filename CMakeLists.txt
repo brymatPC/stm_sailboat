@@ -53,6 +53,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     ${CMAKE_SOURCE_DIR}/app/AppInterface.cpp
     ${CMAKE_SOURCE_DIR}/app/PulseCapture.cpp
+    ${CMAKE_SOURCE_DIR}/app/Knotmeter.cpp
 )
 
 # Add include paths

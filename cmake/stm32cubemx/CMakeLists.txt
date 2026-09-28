@@ -4,7 +4,7 @@ enable_language(C ASM)
 # STM32CubeMX generated symbols (macros)
 set(MX_Defines_Syms 
 	USE_HAL_DRIVER 
-	STM32L053xx
+	STM32L031xx
     $<$<CONFIG:Debug>:DEBUG>
 )
 
@@ -24,15 +24,17 @@ set(MX_Application_Src
     ${CMAKE_SOURCE_DIR}/Core/Src/stm32l0xx_hal_msp.c
     ${CMAKE_SOURCE_DIR}/Core/Src/sysmem.c
     ${CMAKE_SOURCE_DIR}/Core/Src/syscalls.c
-    ${CMAKE_SOURCE_DIR}/startup_stm32l053xx.s
+    ${CMAKE_SOURCE_DIR}/startup_stm32l031xx.s
 )
 
 # STM32 HAL/LL Drivers
 set(STM32_Drivers_Src
     ${CMAKE_SOURCE_DIR}/Core/Src/system_stm32l0xx.c
+    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim.c
+    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim_ex.c
+    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_i2c.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_i2c_ex.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rcc.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_rcc_ex.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_flash_ramfunc.c
@@ -44,8 +46,6 @@ set(STM32_Drivers_Src
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_pwr_ex.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_cortex.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_exti.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim.c
-    ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_tim_ex.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart.c
     ${CMAKE_SOURCE_DIR}/Drivers/STM32L0xx_HAL_Driver/Src/stm32l0xx_hal_uart_ex.c
 )

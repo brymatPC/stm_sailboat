@@ -19,7 +19,7 @@ PulseCapture::PulseCapture() :
 }
 PulseCapture::~PulseCapture() {}
 void PulseCapture::init() {
-    m_apbFreq = HAL_RCC_GetPCLK1Freq() / 32;
+    m_apbFreq = HAL_RCC_GetPCLK1Freq() / 64;
     HAL_TIM_IC_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *) m_captureQ.getBuffer(), m_captureQ.size());
     m_initialized = true;
 }
@@ -55,15 +55,17 @@ void PulseCapture::slice() {
     }
 }
 
-float PulseCapture::calculateFrequency() {
+uint32_t PulseCapture::calculateFrequency() {
     uint32_t averageInterval = 0;
     for(uint32_t i=0; i < MAX_NUM_CAPTURES; i++) {
-        averageInterval += m_captures[i];
+        averageInterval += (uint32_t) (m_captures[i]);
     }
     if(averageInterval > 0) {
-        float average = ((float) averageInterval) / ((float) MAX_NUM_CAPTURES);
-        float clkFreq = (float) m_apbFreq;
+        uint32_t average = ((uint32_t) averageInterval) / ((uint32_t) MAX_NUM_CAPTURES);
+        uint32_t clkFreq = (uint32_t) m_apbFreq;
         return clkFreq / average;
+        //return average;
+        //return clkFreq;
     } else {
         return 0;
     }

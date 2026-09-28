@@ -15,17 +15,18 @@ class Knotmeter : public PulseCapture {
 private:
     static const float s_DEFAULT_SCALE;
     static const float s_DEFAULT_OFFSET;
+    static const uint32_t s_FREQ_TO_KNOTS;
     bool m_enabled;
     float m_scale;
     float m_offset;
-    float m_speed_kts;
+    uint32_t m_speed_kts;
 
     char m_nmeaSentence[83];
-    CircularQ<char, 512> m_outQ;
+    CircularQ<char, 256> m_outQ;
 
     DebugLog *m_pdbg;
 
-    void generateNmeaSentence(float speedKnots, float speedKmH);
+    void generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH);
 public:
     Knotmeter(DebugLog *dbg);
     virtual const char* sliceName( void) { return "Knotmeter"; }

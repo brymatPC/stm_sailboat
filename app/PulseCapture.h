@@ -24,7 +24,7 @@ protected:
     IntervalTimer m_timer;
 
     CircularQ<uint16_t, MAX_NUM_CAPTURES> m_captureQ;
-    float calculateFrequency();
+    uint32_t calculateFrequency();
     void resetCaptures();
 public:
     PulseCapture();

@@ -13,11 +13,13 @@
 #define FREQ_TO_SPEED         (M_PI * KNOTMETER_DIAMETER_M / KNOTMETER_EST_SLIP)
 
 // Anything above this is invalid
-#define KNOTMETER_MAX_FREQ    (100.0f)
+#define KNOTMETER_MAX_FREQ    (1000000)
 
 
 const float Knotmeter::s_DEFAULT_SCALE = FREQ_TO_SPEED;
 const float Knotmeter::s_DEFAULT_OFFSET = 0.0f;
+
+const uint32_t Knotmeter::s_FREQ_TO_KNOTS = (uint32_t) (FREQ_TO_SPEED * 1.94384f * 100.0f);
 
 extern TIM_HandleTypeDef htim2;
 
@@ -25,7 +27,7 @@ Knotmeter::Knotmeter(DebugLog *dbg) :
     m_enabled(true),
     m_scale(s_DEFAULT_SCALE),
     m_offset(s_DEFAULT_OFFSET),
-    m_speed_kts(0.0f),
+    m_speed_kts(0),
     m_pdbg(dbg)
 {
     m_timer.setInterval(5000);
@@ -52,7 +54,7 @@ void Knotmeter::slice() {
     }
 
     if(m_timer.isNextInterval()) {
-        float freq = 0.0f;
+        uint32_t freq = 0;
         uint32_t numCaptures = m_numCaptures;
         m_numCaptures = 0;
         if(numCaptures > 0) {
@@ -63,11 +65,11 @@ void Knotmeter::slice() {
         } else {
             resetCaptures();
         }
-        float speed_m_per_sec = freq * m_scale + m_offset;
-        m_speed_kts = speed_m_per_sec * 1.94384f;
-        float speed_km_per_hour = speed_m_per_sec * 3.6f;
+        // float speed_m_per_sec = freq * m_scale + m_offset;
+        m_speed_kts = freq * s_FREQ_TO_KNOTS;
+        uint32_t speed_km_per_hour = (m_speed_kts / 10) * 19;
         if(m_pdbg) {
-            m_pdbg->print(__FILE__, __LINE__, 1, (uint32_t) (freq * 10.0f), (uint32_t) (m_speed_kts * 10.0f), "Freq, knots");
+            m_pdbg->print(__FILE__, __LINE__, 1, (uint32_t) (freq), (uint32_t) (m_speed_kts/10), "Freq, knots");
         }
         generateNmeaSentence(m_speed_kts, speed_km_per_hour);
     }
@@ -77,16 +79,16 @@ void Knotmeter::init() {
     PulseCapture::init();
 }
 
-void Knotmeter::generateNmeaSentence(float speedKnots, float speedKmH) {
+void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {
     // Format: $VHW,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
     char nmeaBuf[70];
 
-    uint16_t knotsInt = (uint16_t) speedKnots;
-    uint16_t knotsTenths = (uint16_t) (speedKnots * 10.0f);
+    uint16_t knotsInt = (uint16_t) speedKnots / 100;
+    uint16_t knotsTenths = (uint16_t) (speedKnots / 10);
     knotsTenths = knotsTenths % 10;
 
-    uint16_t kmInt = (uint16_t) speedKmH;
-    uint16_t kmTenths = (uint16_t) (speedKmH * 10.0f);
+    uint16_t kmInt = (uint16_t) speedKmH / 100;
+    uint16_t kmTenths = (uint16_t) (speedKmH / 10);
     kmTenths = kmTenths % 10;
 
     snprintf(nmeaBuf, 70, "DMVHW,,T,,M,%0u.%0u,N,%0u.%0u,K", knotsInt, knotsTenths, kmInt, kmTenths);

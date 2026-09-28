@@ -22,10 +22,13 @@ void initializeApp() {
 }
 
 void updateApp() {
-    // TODO: Re-add LED blinking
-    // HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-    // HAL_Delay(500);
     Sliceable::sliceAll();
+
+    if(knotmeter.isValid()) {
+        HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PinState::GPIO_PIN_SET);
+    } else {
+        HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PinState::GPIO_PIN_RESET);
+    }
 
     // char c;
     // for( uint8_t i = 0; i < 32 && debugLog.valueAvailable(); i++) {

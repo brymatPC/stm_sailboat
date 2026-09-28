@@ -15,18 +15,11 @@
 // Anything above this is invalid
 #define KNOTMETER_MAX_FREQ    (1000000)
 
-
-const float Knotmeter::s_DEFAULT_SCALE = FREQ_TO_SPEED;
-const float Knotmeter::s_DEFAULT_OFFSET = 0.0f;
-
 const uint32_t Knotmeter::s_FREQ_TO_KNOTS = (uint32_t) (FREQ_TO_SPEED * 1.94384f * 100.0f);
 
 extern TIM_HandleTypeDef htim2;
 
 Knotmeter::Knotmeter(DebugLog *dbg) :
-    m_enabled(true),
-    m_scale(s_DEFAULT_SCALE),
-    m_offset(s_DEFAULT_OFFSET),
     m_speed_kts(0),
     m_pdbg(dbg)
 {
@@ -34,23 +27,21 @@ Knotmeter::Knotmeter(DebugLog *dbg) :
 }
 
 void Knotmeter::slice() {
-    if(!m_initialized || !m_enabled) return;
+    if(!m_initialized) return;
 
-	uint16_t availableQ  = m_captureQ.size();
-    uint16_t bytesInDMA  = __HAL_DMA_GET_COUNTER(htim2.hdma[TIM_DMA_ID_CC1]);
+    uint16_t availableQ = m_captureQ.size();
+    uint16_t bytesInDMA = __HAL_DMA_GET_COUNTER(htim2.hdma[TIM_DMA_ID_CC1]);
     m_captureQ.setHead(availableQ - bytesInDMA);
 
-    {
-        if(m_captureQ.used() > 0) {
-            uint16_t captureValue = m_captureQ.get();
-            m_captures[m_captureIndex] = (captureValue - m_lastCapture);
-            m_lastCapture = captureValue;
-            m_captureIndex++;
-            if(m_captureIndex >= MAX_NUM_CAPTURES) {
-                m_captureIndex = 0;
-            }
-            m_numCaptures++;
+    if(m_captureQ.used() > 0) {
+        uint16_t captureValue = m_captureQ.get();
+        m_captures[m_captureIndex] = (captureValue - m_lastCapture);
+        m_lastCapture = captureValue;
+        m_captureIndex++;
+        if(m_captureIndex >= MAX_NUM_CAPTURES) {
+            m_captureIndex = 0;
         }
+        m_numCaptures++;
     }
 
     if(m_timer.isNextInterval()) {
@@ -60,12 +51,11 @@ void Knotmeter::slice() {
         if(numCaptures > 0) {
             freq = calculateFrequency();
             if(freq > KNOTMETER_MAX_FREQ) {
-                freq = 0.0f;
+                freq = 0;
             }
         } else {
             resetCaptures();
         }
-        // float speed_m_per_sec = freq * m_scale + m_offset;
         m_speed_kts = freq * s_FREQ_TO_KNOTS;
         uint32_t speed_km_per_hour = (m_speed_kts / 10) * 19;
         if(m_pdbg) {
@@ -77,6 +67,10 @@ void Knotmeter::slice() {
 
 void Knotmeter::init() {
     PulseCapture::init();
+}
+
+bool Knotmeter::isValid() {
+    return m_speed_kts > 0;
 }
 
 void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {

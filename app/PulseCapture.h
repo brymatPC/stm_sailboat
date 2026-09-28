@@ -31,7 +31,7 @@ public:
     virtual ~PulseCapture();
     virtual const char* sliceName( void) { return "PulseCapture"; }
     virtual void init();
-    virtual void slice( void);
+    virtual void slice(void);
 };
 
 #endif //PULSE_CAPTURE_H_

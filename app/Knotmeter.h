@@ -10,6 +10,8 @@ class Knotmeter : public PulseCapture {
 private:
     static const uint32_t s_FREQ_TO_KNOTS;
     static const uint32_t s_FREQ_TO_KMH;
+    static const uint32_t s_FREQ_TO_mKNOTS;
+    static const uint32_t s_FREQ_TO_MH;
     uint32_t m_speed_kts;
 
     CircularQ<char, 256> m_outQ;

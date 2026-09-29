@@ -36,6 +36,14 @@ uint32_t PulseCapture::calculateFrequency() {
     }
 }
 
+uint32_t PulseCapture::calculateAverage() {
+    uint32_t averageInterval = 0;
+    for(uint32_t i=0; i < MAX_NUM_CAPTURES; i++) {
+        averageInterval += (uint32_t) (m_captures[i]);
+    }
+    return averageInterval / MAX_NUM_CAPTURES;
+}
+
 void PulseCapture::resetCaptures() {
     memset(m_captures, 0, MAX_NUM_CAPTURES * sizeof(uint16_t));
     m_captureIndex = 0;

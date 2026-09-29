@@ -26,6 +26,8 @@ protected:
     CircularQ<uint16_t, MAX_NUM_CAPTURES> m_captureQ;
     // Returns Frequency in tenths of a Hz
     uint32_t calculateFrequency();
+    // Returns average of captured counts
+    uint32_t calculateAverage();
     void resetCaptures();
 public:
     PulseCapture();

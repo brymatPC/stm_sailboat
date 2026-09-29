@@ -8,14 +8,21 @@
 #endif
 
 #define KNOTMETER_DIAMETER_M  (0.023f)
+#define KNOTMETER_DIAMETER_MM  (23.0f)
 #define KNOTMETER_EST_SLIP    (1.0f)
 #define FREQ_TO_SPEED         (M_PI * KNOTMETER_DIAMETER_M / KNOTMETER_EST_SLIP)
+#define FREQ_TO_SPEED_MM      (M_PI * KNOTMETER_DIAMETER_MM / KNOTMETER_EST_SLIP)
 
 // Anything above this is invalid, in tenths of a Hz
 #define KNOTMETER_MAX_FREQ    (1000)
+// Anything less than this is invalid
+#define KNOTMETER_MIN_COUNT   (2500)
 
 const uint32_t Knotmeter::s_FREQ_TO_KNOTS = (uint32_t) (FREQ_TO_SPEED * 1.94384f * 100.0f);
 const uint32_t Knotmeter::s_FREQ_TO_KMH = (uint32_t) (FREQ_TO_SPEED * 3.6f * 100.0f);
+
+const uint32_t Knotmeter::s_FREQ_TO_mKNOTS = (uint32_t) (FREQ_TO_SPEED_MM * 1.94384f);
+const uint32_t Knotmeter::s_FREQ_TO_MH = (uint32_t) (FREQ_TO_SPEED_MM * 3.6f);
 
 extern TIM_HandleTypeDef htim2;
 
@@ -44,20 +51,25 @@ void Knotmeter::slice() {
     }
 
     if(m_timer.isNextInterval()) {
-        uint32_t freq = 0;
+        uint32_t average = 0;
         uint32_t numCaptures = m_numCaptures;
         m_numCaptures = 0;
         if(numCaptures > 0) {
-            freq = calculateFrequency();
-            if(freq > KNOTMETER_MAX_FREQ) {
-                freq = 0;
+            average = calculateAverage();
+            if(average < KNOTMETER_MIN_COUNT) {
+                average = 0;
             }
         } else {
             resetCaptures();
         }
-        m_speed_kts = freq * s_FREQ_TO_KNOTS;
-        uint32_t speed_km_per_hour = freq * s_FREQ_TO_KMH;
-        generateNmeaSentence(m_speed_kts, speed_km_per_hour);
+        if(average > 0) {
+            m_speed_kts = (m_apbFreq * s_FREQ_TO_mKNOTS + (average / 2)) / average;
+            uint32_t speed_km_per_hour = (m_apbFreq * s_FREQ_TO_MH + (average / 2)) / average;
+            generateNmeaSentence(m_speed_kts, speed_km_per_hour);
+        } else {
+            m_speed_kts = 0;
+            generateNmeaSentence(m_speed_kts, 0);
+        }
     }
 }
 

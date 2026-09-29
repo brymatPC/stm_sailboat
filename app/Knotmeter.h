@@ -12,7 +12,6 @@ private:
     static const uint32_t s_FREQ_TO_KNOTS;
     uint32_t m_speed_kts;
 
-    char m_nmeaSentence[83];
     CircularQ<char, 256> m_outQ;
 
     DebugLog *m_pdbg;

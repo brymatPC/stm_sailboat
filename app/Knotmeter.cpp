@@ -2,7 +2,6 @@
 
 // STM / C Libraries
 #include <math.h>
-#include <stdio.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -75,29 +74,63 @@ bool Knotmeter::isValid() {
 
 void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {
     // Format: $VHW,x.x,T,x.x,M,x.x,N,x.x,K*hh<CR><LF>
-    char nmeaBuf[70];
+    static char startStr[] = "DMVHW,,T,,M,";
+    char nmeaBuf[100];
 
-    uint16_t knotsInt = (uint16_t) speedKnots / 100;
+    strncpy(nmeaBuf, startStr, 100);
+    size_t len = strlen(nmeaBuf);
+
+    uint16_t knotsInt = (uint16_t) speedKnots / 10;
     uint16_t knotsTenths = (uint16_t) (speedKnots / 10);
     knotsTenths = knotsTenths % 10;
 
-    uint16_t kmInt = (uint16_t) speedKmH / 100;
+    nmeaBuf[len++] = '0' + knotsInt / 10;
+    nmeaBuf[len++] = '0' + knotsInt % 10;
+    nmeaBuf[len++] = '.';
+    nmeaBuf[len++] = '0' + knotsTenths;
+    nmeaBuf[len++] = ',';
+    nmeaBuf[len++] = 'N';
+    nmeaBuf[len++] = ',';
+
+    uint16_t kmInt = (uint16_t) speedKmH / 10;
     uint16_t kmTenths = (uint16_t) (speedKmH / 10);
     kmTenths = kmTenths % 10;
 
-    snprintf(nmeaBuf, 70, "DMVHW,,T,,M,%0u.%0u,N,%0u.%0u,K", knotsInt, knotsTenths, kmInt, kmTenths);
+    nmeaBuf[len++] = '0' + kmInt / 10;
+    nmeaBuf[len++] = '0' + kmInt % 10;
+    nmeaBuf[len++] = '.';
+    nmeaBuf[len++] = '0' + kmTenths;
+    nmeaBuf[len++] = ',';
+    nmeaBuf[len++] = 'K';
 
     uint8_t checksum = 0;
-    uint8_t len = strlen(nmeaBuf);
     for(uint8_t i=0; i < len; i++) {
         checksum ^= nmeaBuf[i];
     }
-    snprintf(m_nmeaSentence, 83, "$%s*%02X\r\n", nmeaBuf, checksum);
 
-    len = strlen(m_nmeaSentence);
-    if(m_outQ.spaceAvailable(len)) {
+    nmeaBuf[len++] = '*';
+
+    uint8_t c = (checksum & 0xF0) >> 4;
+    if(c >  9) {
+        nmeaBuf[len++] = '7' + c;
+    } else {
+        nmeaBuf[len++] = '0' + c;
+    }
+    c = (checksum & 0x0F);
+    if(c >  9) {
+        nmeaBuf[len++] = '7' + c;
+    } else {
+        nmeaBuf[len++] = '0' + c;
+    }
+    nmeaBuf[len++] = '\r';
+    nmeaBuf[len++] = '\n';
+
+
+    len = strlen(nmeaBuf);
+    if(m_outQ.spaceAvailable(len+1)) {
+        m_outQ.put('$');
         for(uint8_t i=0; i < len; i++) {
-            m_outQ.put(m_nmeaSentence[i]);
+            m_outQ.put(nmeaBuf[i]);
         }
     }
     // if(m_pdbg) {

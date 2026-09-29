@@ -30,7 +30,7 @@ uint32_t PulseCapture::calculateFrequency() {
     }
     if(averageInterval > 0) {
         uint32_t average = ((uint32_t) averageInterval) / ((uint32_t) MAX_NUM_CAPTURES);
-        return m_apbFreq / average;
+        return (m_apbFreq * 10 + average/2) / average;
     } else {
         return 0;
     }

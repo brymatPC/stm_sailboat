@@ -24,6 +24,7 @@ protected:
     IntervalTimer m_timer;
 
     CircularQ<uint16_t, MAX_NUM_CAPTURES> m_captureQ;
+    // Returns Frequency in tenths of a Hz
     uint32_t calculateFrequency();
     void resetCaptures();
 public:

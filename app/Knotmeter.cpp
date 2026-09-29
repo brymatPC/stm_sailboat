@@ -11,10 +11,11 @@
 #define KNOTMETER_EST_SLIP    (1.0f)
 #define FREQ_TO_SPEED         (M_PI * KNOTMETER_DIAMETER_M / KNOTMETER_EST_SLIP)
 
-// Anything above this is invalid
-#define KNOTMETER_MAX_FREQ    (1000000)
+// Anything above this is invalid, in tenths of a Hz
+#define KNOTMETER_MAX_FREQ    (1000)
 
 const uint32_t Knotmeter::s_FREQ_TO_KNOTS = (uint32_t) (FREQ_TO_SPEED * 1.94384f * 100.0f);
+const uint32_t Knotmeter::s_FREQ_TO_KMH = (uint32_t) (FREQ_TO_SPEED * 3.6f * 100.0f);
 
 extern TIM_HandleTypeDef htim2;
 
@@ -55,7 +56,7 @@ void Knotmeter::slice() {
             resetCaptures();
         }
         m_speed_kts = freq * s_FREQ_TO_KNOTS;
-        uint32_t speed_km_per_hour = (m_speed_kts / 10) * 19;
+        uint32_t speed_km_per_hour = freq * s_FREQ_TO_KMH;
         generateNmeaSentence(m_speed_kts, speed_km_per_hour);
     }
 }
@@ -76,8 +77,8 @@ void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {
     strncpy(nmeaBuf, startStr, 100);
     size_t len = strlen(nmeaBuf);
 
-    uint16_t knotsInt = (uint16_t) speedKnots / 10;
-    uint16_t knotsTenths = (uint16_t) (speedKnots / 10);
+    uint16_t knotsInt = (uint16_t) (speedKnots / 1000);
+    uint16_t knotsTenths = (uint16_t) (speedKnots / 100);
     knotsTenths = knotsTenths % 10;
 
     nmeaBuf[len++] = '0' + knotsInt / 10;
@@ -88,8 +89,8 @@ void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {
     nmeaBuf[len++] = 'N';
     nmeaBuf[len++] = ',';
 
-    uint16_t kmInt = (uint16_t) speedKmH / 10;
-    uint16_t kmTenths = (uint16_t) (speedKmH / 10);
+    uint16_t kmInt = (uint16_t) (speedKmH / 1000);
+    uint16_t kmTenths = (uint16_t) (speedKmH / 100);
     kmTenths = kmTenths % 10;
 
     nmeaBuf[len++] = '0' + kmInt / 10;

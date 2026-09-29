@@ -7,8 +7,8 @@
 extern TIM_HandleTypeDef htim2;
 
 PulseCapture::PulseCapture() :
-    m_apbFreq(1),
     m_initialized(false),
+    m_apbFreq(1),
     m_lastCapture(0),
     m_captureIndex(0),
     m_numCaptures(0),
@@ -23,38 +23,6 @@ void PulseCapture::init() {
     HAL_TIM_IC_Start_DMA(&htim2, TIM_CHANNEL_1, (uint32_t *) m_captureQ.getBuffer(), m_captureQ.size());
     m_initialized = true;
 }
-void PulseCapture::slice() {
-    if(!m_initialized) return;
-
-	uint16_t availableQ  = m_captureQ.size();
-    uint16_t bytesInDMA  = __HAL_DMA_GET_COUNTER(htim2.hdma[TIM_DMA_ID_CC1]);
-    m_captureQ.setHead(availableQ - bytesInDMA);
-
-    {
-        if(m_captureQ.used() > 0) {
-            uint16_t captureValue = m_captureQ.get();
-            m_captures[m_captureIndex] = (captureValue - m_lastCapture);
-            m_lastCapture = captureValue;
-            m_captureIndex++;
-            if(m_captureIndex >= MAX_NUM_CAPTURES) {
-                m_captureIndex = 0;
-            }
-            m_numCaptures++;
-        }
-    }
-
-    if(m_timer.isNextInterval()) {
-        float freq = 0.0f;
-        uint32_t numCaptures = m_numCaptures;
-        m_numCaptures = 0;
-        if(numCaptures > 0) {
-            freq = calculateFrequency();
-        } else {
-            resetCaptures();
-        }
-    }
-}
-
 uint32_t PulseCapture::calculateFrequency() {
     uint32_t averageInterval = 0;
     for(uint32_t i=0; i < MAX_NUM_CAPTURES; i++) {
@@ -62,10 +30,7 @@ uint32_t PulseCapture::calculateFrequency() {
     }
     if(averageInterval > 0) {
         uint32_t average = ((uint32_t) averageInterval) / ((uint32_t) MAX_NUM_CAPTURES);
-        uint32_t clkFreq = (uint32_t) m_apbFreq;
-        return clkFreq / average;
-        //return average;
-        //return clkFreq;
+        return m_apbFreq / average;
     } else {
         return 0;
     }

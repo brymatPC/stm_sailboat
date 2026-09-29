@@ -13,10 +13,10 @@
 
 class PulseCapture : public Sliceable {
 private:
-    uint32_t m_apbFreq;
 
 protected:
     bool m_initialized;
+    uint32_t m_apbFreq;
     uint16_t m_lastCapture;
     uint16_t m_captures[MAX_NUM_CAPTURES];
     uint32_t m_captureIndex;
@@ -31,7 +31,7 @@ public:
     virtual ~PulseCapture();
     virtual const char* sliceName( void) { return "PulseCapture"; }
     virtual void init();
-    virtual void slice(void);
+    virtual void slice(void) {};
 };
 
 #endif //PULSE_CAPTURE_H_

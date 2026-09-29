@@ -18,9 +18,8 @@ const uint32_t Knotmeter::s_FREQ_TO_KNOTS = (uint32_t) (FREQ_TO_SPEED * 1.94384f
 
 extern TIM_HandleTypeDef htim2;
 
-Knotmeter::Knotmeter(DebugLog *dbg) :
-    m_speed_kts(0),
-    m_pdbg(dbg)
+Knotmeter::Knotmeter() :
+    m_speed_kts(0)
 {
     m_timer.setInterval(5000);
 }
@@ -57,9 +56,6 @@ void Knotmeter::slice() {
         }
         m_speed_kts = freq * s_FREQ_TO_KNOTS;
         uint32_t speed_km_per_hour = (m_speed_kts / 10) * 19;
-        if(m_pdbg) {
-            m_pdbg->print(__FILE__, __LINE__, 1, (uint32_t) (freq), (uint32_t) (m_speed_kts/10), "Freq, knots");
-        }
         generateNmeaSentence(m_speed_kts, speed_km_per_hour);
     }
 }
@@ -133,7 +129,4 @@ void Knotmeter::generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH) {
             m_outQ.put(nmeaBuf[i]);
         }
     }
-    // if(m_pdbg) {
-    //     m_pdbg->print(__FILE__, __LINE__, 1, nmeaBuf);
-    // }
 }

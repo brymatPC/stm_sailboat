@@ -5,7 +5,6 @@
 
 // External components
 #include <CircularQ.h>
-#include <utility/DebugLog.h>
 
 class Knotmeter : public PulseCapture {
 private:
@@ -14,11 +13,9 @@ private:
 
     CircularQ<char, 256> m_outQ;
 
-    DebugLog *m_pdbg;
-
     void generateNmeaSentence(uint32_t speedKnots, uint32_t speedKmH);
 public:
-    Knotmeter(DebugLog *dbg);
+    Knotmeter();
     virtual const char* sliceName( void) { return "Knotmeter"; }
     virtual void slice( void) override;
 
